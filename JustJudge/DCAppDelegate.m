@@ -20,7 +20,7 @@
     
     NSString *dir = [NSString stringWithFormat:@"%@/Music", [paths objectAtIndex:0]];
     
-    [[DCFileMonitor sharedDCFileMonitor] watch:dir recursively:YES withHandler:^(NSString *path, dispatch_source_vnode_flags_t flags) {
+    [[DCFileMonitor sharedDCFileMonitor] watch:dir recursively:YES onlyDirectory:YES  withHandler:^(NSString *path, dispatch_source_vnode_flags_t flags) {
         NSLog(@"File Monitor fired. path:%@ flags:%lu", path, flags);
     }];
     

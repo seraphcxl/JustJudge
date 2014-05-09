@@ -16,7 +16,8 @@ typedef void (^DCFileMonitorHandler)(NSString *path, dispatch_source_vnode_flags
 DEFINE_SINGLETON_FOR_HEADER(DCFileMonitor)
 
 - (NSArray *)watchList;
-- (BOOL)watch:(NSString *)path recursively:(BOOL)recursively withHandler:(DCFileMonitorHandler)handler;
+
+- (BOOL)watch:(NSString *)path recursively:(BOOL)recursively onlyDirectory:(BOOL)onlyDirectory withHandler:(DCFileMonitorHandler)handler;
 - (BOOL)stopWatch:(NSString *)path recursively:(BOOL)recursively;
 
 @end

@@ -14,7 +14,7 @@
 
 @property (strong, nonatomic, readonly) NSMutableDictionary *path2Monitor;  // k:(NSString *) v:(dispatch_source_t)
 
-- (NSArray *)_enumSubDir:(NSString *)path;
+- (NSArray *)_enumSubContents:(NSString *)path onlyDirectory:(BOOL)onlyDirectory;
 - (BOOL)_watch:(NSString *)path withHandler:(DCFileMonitorHandler)handler;
 - (dispatch_source_t)_getFileMonitor:(NSString *)path;
 - (BOOL)_removeFileMonitor:(NSString *)path recursively:(BOOL)recursively;
@@ -44,7 +44,7 @@ DEFINE_SINGLETON_FOR_CLASS(DCFileMonitor)
     return result;
 }
 
-- (BOOL)watch:(NSString *)path recursively:(BOOL)recursively withHandler:(DCFileMonitorHandler)handler {
+- (BOOL)watch:(NSString *)path recursively:(BOOL)recursively onlyDirectory:(BOOL)onlyDirectory withHandler:(DCFileMonitorHandler)handler {
     BOOL result = NO;
     do {
         if (!path || !handler) {
@@ -57,22 +57,30 @@ DEFINE_SINGLETON_FOR_CLASS(DCFileMonitor)
             break;
         }
         
-        if (recursively) {
-            NSArray *subDirAry = [self _enumSubDir:newPath];
-            
-            BOOL failed = NO;
-            for (NSString *subDirPath in subDirAry) {
-                if (![self _watch:subDirPath withHandler:handler]) {
-                    failed = YES;
-                    break;
-                }
-            }
-            
-            if (failed) {
+        BOOL isDir = NO;
+        if ([[NSFileManager defaultManager] fileExistsAtPath:newPath isDirectory:&isDir]) {
+            if (![self _watch:newPath withHandler:handler]) {
                 break;
             }
+            
+            if (isDir) {
+                if (recursively) {
+                    NSArray *subContentsAry = [self _enumSubContents:path onlyDirectory:onlyDirectory];
+                    
+                    BOOL failed = NO;
+                    for (NSString *subContentPath in subContentsAry) {
+                        if (![self _watch:subContentPath withHandler:handler]) {
+                            failed = YES;
+                            break;
+                        }
+                    }
+                    
+                    if (failed) {
+                        break;
+                    }
+                }
+            }
         }
-        
     } while (NO);
     return result;
 }
@@ -95,7 +103,7 @@ DEFINE_SINGLETON_FOR_CLASS(DCFileMonitor)
     return result;
 }
 
-- (NSArray *)_enumSubDir:(NSString *)path {
+- (NSArray *)_enumSubContents:(NSString *)path onlyDirectory:(BOOL)onlyDirectory {
     NSMutableArray *result = [NSMutableArray array];
     do {
         if (!path) {
@@ -112,8 +120,12 @@ DEFINE_SINGLETON_FOR_CLASS(DCFileMonitor)
             }];
             for (NSURL *url in enumerator) {
                 NSString *subPath = [url path];
-                if ([[NSFileManager defaultManager] fileExistsAtPath:subPath isDirectory:&isDir] && isDir) {
-                    [result addObject:[url path]];
+                if ([[NSFileManager defaultManager] fileExistsAtPath:subPath isDirectory:&isDir]) {
+                    if (onlyDirectory && !isDir) {
+                        ;
+                    } else {
+                        [result addObject:[url path]];
+                    }
                 }
             }
         }
@@ -131,8 +143,7 @@ DEFINE_SINGLETON_FOR_CLASS(DCFileMonitor)
 
         dispatch_source_t internalSource = [self _getFileMonitor:path];
         if (!internalSource) {
-            BOOL isDir = NO;
-            if (![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir] || !isDir) {
+            if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
                 break;
             }
             
