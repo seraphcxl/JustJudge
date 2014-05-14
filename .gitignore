@@ -23,3 +23,5 @@ profile
 DerivedData
 .idea/
 
+
+*.xcuserstate
