@@ -67,13 +67,19 @@ DEFINE_SINGLETON_FOR_CLASS(DCFileMonitor)
                 if (recursively) {
                     NSArray *subContentsAry = [self _enumSubContents:path onlyDirectory:onlyDirectory];
                     
-                    BOOL failed = NO;
-                    for (NSString *subContentPath in subContentsAry) {
-                        if (![self _watch:subContentPath withHandler:handler]) {
-                            failed = YES;
-                            break;
-                        }
-                    }
+                    __block BOOL failed = NO;
+                    dispatch_apply(subContentsAry.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t idx) {
+                        do {
+                            if (failed) {
+                                break;
+                            }
+                            NSString *subContentPath = [subContentsAry objectAtIndex:idx];
+                            if (![self _watch:subContentPath withHandler:handler]) {
+                                failed = YES;
+                                break;
+                            }
+                        } while (NO);
+                    });
                     
                     if (failed) {
                         break;
@@ -211,13 +217,19 @@ DEFINE_SINGLETON_FOR_CLASS(DCFileMonitor)
                 }
             }
             
-            BOOL failed = NO;
-            for (NSString *watchPath in removeDirAry) {
-                if (![self _removeFileMonitor:watchPath]) {
-                    failed = YES;
-                    break;
-                }
-            }
+            __block BOOL failed = NO;
+            dispatch_apply(removeDirAry.count, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^(size_t idx) {
+                do {
+                    if (failed) {
+                        break;
+                    }
+                    NSString *watchPath = [removeDirAry objectAtIndex:idx];
+                    if (![self _removeFileMonitor:watchPath]) {
+                        failed = YES;
+                        break;
+                    }
+                } while (NO);
+            });
             
             if (failed) {
                 break;
