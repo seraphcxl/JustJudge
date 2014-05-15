@@ -3,7 +3,7 @@
 
 
 # Xcode
-**/xcuserdata
+*/xcuserdata/*
 
 # CocoaPods
 #
