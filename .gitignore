@@ -1,6 +1,10 @@
 *~
 .DS_Store
 
+
+# Xcode
+**/xcuserdata
+
 # CocoaPods
 #
 # We recommend against adding the Pods directory to your .gitignore. However
@@ -8,7 +12,3 @@
 # http://guides.cocoapods.org/using/using-cocoapods.html#should-i-ignore-the-pods-directory-in-source-control?
 #
 Pods/
-
-# Xcode
-*.xccheckout
-*.xcworkspacedata
