@@ -14,7 +14,18 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
-    // Insert code here to initialize your application
+    NSLog(@"%s", __BASE_FILE__);
+    NSLog(@"%s", __DATE__);
+    NSLog(@"%s", __FILE__);
+    NSLog(@"%s", __func__);
+    NSLog(@"%s", __FUNCTION__);
+    NSLog(@"%d", __LINE__);
+    NSLog(@"%s", __PRETTY_FUNCTION__);
+    NSLog(@"%s", __TIME__);
+    NSLog(@"%s", __TIMESTAMP__);
+    NSLog(@"%s", __VERSION__);
+    
+    
     
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     
